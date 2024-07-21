@@ -1,5 +1,4 @@
-﻿README
-Directory Guardian
+﻿Directory Guardian
 Description
 Directory Guardian is a powerful C# application that actively monitors directories and sorts files based on file type, user preferences, and settings. The application provides a modern and intuitive user interface for easy configuration and monitoring, ensuring your files are always organized efficiently.
 
