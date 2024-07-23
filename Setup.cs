@@ -28,5 +28,4 @@ public class Setup
     {
         _extensionsToSort.Add(extension);
     }
-
 }

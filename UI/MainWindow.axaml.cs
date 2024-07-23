@@ -40,8 +40,13 @@ public partial class MainWindow : Window
             setup.AddDirectoryToSort(selectedFolderPath.LocalPath);
         }
         dirGuard = new DirGuard(setup);
-        dirGuard.Directory_Guardian();
+        dirGuard.Directory_Guardian(JobType.Initialize);
         DisplayExtensions(dirGuard.Extensions_List);
+    }
+
+    private void SortExtensions(object sender, RoutedEventArgs e)
+    {
+        dirGuard.Directory_Guardian(JobType.Sort);
     }
 
     private void DisplayExtensions(List<string> extensions)

@@ -1,6 +1,6 @@
 ﻿namespace DirectoryGuardian;
 
-enum JobType
+public enum JobType
 {
     Initialize,
     GetExtensions,

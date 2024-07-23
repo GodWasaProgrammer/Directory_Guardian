@@ -12,10 +12,14 @@ public class DirGuard
         set_up = setup;
     }
 
-    public void Directory_Guardian()
+    public void Directory_Guardian(JobType jobType)
     {
         // We will guard a directory, sort files after file extensions or other variables such as name, size
-        var dirPathToGuard = set_up.FetchDirectoriesToSort();
+        List<string> dirPathToGuard;
+        //if (jobType is JobType.Initialize)
+        //{
+        dirPathToGuard = set_up.FetchDirectoriesToSort();
+        //}
 
         // just shenanigans to pull the first dir
         var singledirpath = dirPathToGuard[0];
@@ -25,11 +29,15 @@ public class DirGuard
         // fetch our extensions, this will be displayed in UI to select which to sort
         Extensions = FetchExtensions(dirinfo);
 
-        // just hard coded for test purposes
-        var listOfFileTypesToSort = new List<string>();
-        listOfFileTypesToSort.Add(".jpg");
+        //// just hard coded for test purposes
+        //var listOfFileTypesToSort = new List<string>();
+        //listOfFileTypesToSort.Add(".jpg");
 
-        SortExtensionType(singledirpath, dirinfo, listOfFileTypesToSort);
+
+        if (jobType is JobType.Sort)
+        {
+            SortExtensionType(singledirpath, dirinfo, set_up.extensionsToSort);
+        }
     }
 
     public List<string> FetchExtensions(string[] directoryInfo)
