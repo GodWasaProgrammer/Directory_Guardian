@@ -3,6 +3,8 @@
 public class DirGuard
 {
     private readonly Setup set_up;
+    public Setup Setup { get { return set_up; } }
+
     private List<string> Extensions;
     public List<string> Extensions_List { get { return Extensions; } }
     public DirGuard(Setup setup)
