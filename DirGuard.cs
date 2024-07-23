@@ -12,11 +12,6 @@ public class DirGuard
         set_up = setup;
     }
 
-    public static void Main()
-    {
-        // Just for compiler
-    }
-
     public void Directory_Guardian()
     {
         // We will guard a directory, sort files after file extensions or other variables such as name, size
