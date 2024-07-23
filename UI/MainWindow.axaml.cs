@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using DirectoryGuardian;
 using System.Collections.Generic;
+using System.Linq;
 using UI.ViewModels;
 namespace UI;
 
@@ -47,6 +48,15 @@ public partial class MainWindow : Window
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
         dirGuard.Directory_Guardian(JobType.Sort);
+        var selectedItems = viewModel.GetSelectedItems();
+        foreach (var item in selectedItems)
+        {
+            var itemsToRemove = viewModel.Items.Where(i => i.Text == item).ToList();
+            foreach (var itemToRemove in itemsToRemove)
+            {
+                viewModel.Items.Remove(itemToRemove);
+            }
+        }
     }
 
     private void DisplayExtensions(List<string> extensions)

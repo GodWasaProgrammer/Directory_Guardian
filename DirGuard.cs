@@ -2,7 +2,7 @@
 
 public class DirGuard
 {
-    private readonly Setup set_up;
+    private Setup set_up;
     public Setup Setup { get { return set_up; } }
 
     private List<string> Extensions;
@@ -21,22 +21,14 @@ public class DirGuard
         dirPathToGuard = set_up.FetchDirectoriesToSort();
         //}
 
-        // just shenanigans to pull the first dir
-        var singledirpath = dirPathToGuard[0];
-
-        var dirinfo = Directory.GetFiles(singledirpath);
+        var dirinfo = Directory.GetFiles(dirPathToGuard[0]);
 
         // fetch our extensions, this will be displayed in UI to select which to sort
+
         Extensions = FetchExtensions(dirinfo);
-
-        //// just hard coded for test purposes
-        //var listOfFileTypesToSort = new List<string>();
-        //listOfFileTypesToSort.Add(".jpg");
-
-
         if (jobType is JobType.Sort)
         {
-            SortExtensionType(singledirpath, dirinfo, set_up.extensionsToSort);
+            SortExtensionType(dirPathToGuard[0], dirinfo, set_up.extensionsToSort);
         }
     }
 
@@ -55,7 +47,7 @@ public class DirGuard
         return listOfExtensions;
     }
 
-    private static void SortExtensionType(string singledirpath, string[] dirinfo, List<string> listOfFileTypesToSort)
+    private void SortExtensionType(string singledirpath, string[] dirinfo, List<string> listOfFileTypesToSort)
     {
         CreateSortingDirectory(singledirpath, listOfFileTypesToSort);
         // we will then sort the files of that type to the dir
@@ -67,6 +59,14 @@ public class DirGuard
                 File.Move(file, destinationPath);
             }
         }
+
+        foreach (var extension in listOfFileTypesToSort)
+        {
+            Extensions.Remove(extension);
+        }
+        set_up.extensionsToSort.Clear();
+
+
     }
 
     private static void CreateSortingDirectory(string singledirpath, List<string> listOfFileTypesToSort)
