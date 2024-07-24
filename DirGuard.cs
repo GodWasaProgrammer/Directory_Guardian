@@ -8,6 +8,8 @@ public class DirGuard(Setup setup)
     private List<string> Extensions = [];
     public List<string> Extensions_List { get { return Extensions; } }
 
+    private FileSystemWatcher? _watcher;
+
     public void Directory_Guardian(JobType jobType)
     {
         // We will guard a directory, sort files after file extensions or other variables such as name, size
@@ -25,6 +27,12 @@ public class DirGuard(Setup setup)
         if (jobType is JobType.Sort)
         {
             SortExtensionType(dirPathToGuard[0], dirinfo, set_up.ExtensionsToSort);
+        }
+
+        if (jobType is JobType.Monitor)
+        {
+            // monitor our directory for changes and apply our sorting logic
+            MonitorDirectory(dirPathToGuard[0]);
         }
     }
 
@@ -59,13 +67,11 @@ public class DirGuard(Setup setup)
             File.Move(file, destinationPath);
         }
 
-        foreach (var extension in listOfFileTypesToSort)
-        {
-            Extensions.Remove(extension);
-        }
-        set_up.ExtensionsToSort.Clear();
-
-
+        //foreach (var extension in listOfFileTypesToSort)
+        //{
+        //    Extensions.Remove(extension);
+        //}
+        //set_up.ExtensionsToSort.Clear();
     }
 
     private static void CreateSortingDirectory(string singledirpath, List<string> listOfFileTypesToSort)
@@ -78,11 +84,140 @@ public class DirGuard(Setup setup)
         }
     }
 
-    public static void GuardDir(string dir)
+    public void MonitorDirectory(string dir)
     {
-        var Watcher = new FileSystemWatcher(dir)
+        if (_watcher != null)
         {
+            _watcher.Dispose();
+        }
+
+        _watcher = new FileSystemWatcher(dir)
+        {
+            NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.Size,
+            Filter = "*.*",
             EnableRaisingEvents = true
         };
+
+        _watcher.Created += OnChanged;
+        _watcher.Changed += OnChanged;
+        _watcher.Deleted += OnChanged;
+        _watcher.Renamed += OnRenamed;
+
+        //unregister the watcher
+        _watcher.Disposed += (sender, e) =>
+        {
+            _watcher.Created -= OnChanged;
+            _watcher.Changed -= OnChanged;
+            _watcher.Deleted -= OnChanged;
+            _watcher.Renamed -= OnRenamed;
+        };
+
+        // do the initial sorting
+        var dirinfo = Directory.GetFiles(dir);
+        SortExtensionType(dir, dirinfo, set_up.ExtensionsToSort);
+    }
+
+    private void OnChanged(object sender, FileSystemEventArgs e)
+    {
+        // Logga eller hantera filändringar
+        Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
+
+        if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"File: {e.FullPath} is not a type to watch, ignoring.");
+            return;
+        }
+
+        // Ignorera temporära filer
+        if (Path.GetExtension(e.FullPath).Equals(".tmp", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"File: {e.FullPath} is a temporary file, ignoring.");
+            return;
+        }
+
+        if (e.ChangeType == WatcherChangeTypes.Created)
+        {
+            HandleNewFile(e.FullPath);
+        }
+    }
+
+    private void OnRenamed(object sender, RenamedEventArgs e)
+    {
+        Console.WriteLine($"File: {e.OldFullPath} renamed to {e.FullPath}");
+
+        if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"File: {e.FullPath} is not a type to watch, ignoring.");
+            return;
+        }
+
+        // Ignorera temporära filer
+        if (Path.GetExtension(e.FullPath).Equals(".tmp", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"File: {e.FullPath} is a temporary file, ignoring.");
+            return;
+        }
+
+        if (!IsFileLocked(e.FullPath))
+        {
+            // moving logic here
+            Console.WriteLine($"File: {e.FullPath} is not in use, can be moved.");
+            // sort the files
+            var listofDirs = Setup.FetchDirectoriesToSort();
+            var singledir = listofDirs[0];
+            var dirinfo = Directory.GetFiles(singledir);
+            SortExtensionType(singledir, dirinfo, set_up.ExtensionsToSort);
+        }
+        else
+        {
+            Console.WriteLine($"File: {e.FullPath} is in use, cannot move.");
+        }
+    }
+
+    public void StopMonitoring()
+    {
+        if (_watcher != null)
+        {
+            _watcher.EnableRaisingEvents = false;
+            _watcher.Dispose();
+            _watcher = null;
+        }
+    }
+
+    private void HandleNewFile(string filePath)
+    {
+        // this is probably not a great solution :D
+        // wait a little bit
+        Thread.Sleep(1000);
+
+        if (!IsFileLocked(filePath))
+        {
+            // moving logic here
+            Console.WriteLine($"File: {filePath} is not in use, can be moved.");
+            // sort the files
+            var listofDirs = Setup.FetchDirectoriesToSort();
+            var singledir = listofDirs[0];
+            var dirinfo = Directory.GetFiles(filePath);
+            SortExtensionType(singledir, dirinfo, set_up.ExtensionsToSort);
+        }
+        else
+        {
+            Console.WriteLine($"File: {filePath} is in use, cannot move.");
+        }
+    }
+
+    private bool IsFileLocked(string filePath)
+    {
+        try
+        {
+            using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                return false;
+            }
+        }
+        catch (IOException)
+        {
+            return true;
+        }
     }
 }

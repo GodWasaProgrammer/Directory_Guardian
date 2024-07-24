@@ -23,6 +23,7 @@
 			<Button Click="OpenFolderButton_Clicked">Choose Directory</Button>
 			<Button Click="PassChosenFiletypeToSortOnClick">Select File types</Button>
 			<Button Click="SortExtensions">Sort Selected</Button>
+			<Button Click="StartGuardianMonitor">Monitor</Button>
 		</StackPanel>
 		<ListBox ItemsSource="{Binding Items}" Grid.Column="1">
 			<ListBox.ItemTemplate>
