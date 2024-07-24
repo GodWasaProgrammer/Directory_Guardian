@@ -9,8 +9,8 @@ namespace UI;
 
 public partial class MainWindow : Window
 {
-    private MainViewModel viewModel;
-    private DirGuard dirGuard;
+    private readonly MainViewModel viewModel;
+    private DirGuard? dirGuard;
     public MainWindow()
     {
         InitializeComponent();
@@ -25,20 +25,25 @@ public partial class MainWindow : Window
         var topLevel = TopLevel.GetTopLevel(this);
 
         // Start async operation to open the dialog.
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = "Open Folder",
-            AllowMultiple = false
-        });
 
         var setup = new Setup();
-        if (folders.Count >= 1)
+        if (topLevel is not null)
         {
-            // Set the variable with the path to the selected folder.
-            var selectedFolderPath = folders[0].Path;
-            // You can now use selectedFolderPath as needed
 
-            setup.AddDirectoryToSort(selectedFolderPath.LocalPath);
+            var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = "Open Folder",
+                AllowMultiple = false
+            });
+
+            if (folders.Count >= 1)
+            {
+                // Set the variable with the path to the selected folder.
+                var selectedFolderPath = folders[0].Path;
+                // You can now use selectedFolderPath as needed
+
+                setup.AddDirectoryToSort(selectedFolderPath.LocalPath);
+            }
         }
         dirGuard = new DirGuard(setup);
         dirGuard.Directory_Guardian(JobType.Initialize);
@@ -47,8 +52,11 @@ public partial class MainWindow : Window
 
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
-        dirGuard.Directory_Guardian(JobType.Sort);
+        dirGuard?.Directory_Guardian(JobType.Sort);
         var selectedItems = viewModel.GetSelectedItems();
+
+        if (selectedItems is null || viewModel.Items is null) return;
+
         foreach (var item in selectedItems)
         {
             var itemsToRemove = viewModel.Items.Where(i => i.Text == item).ToList();
@@ -61,20 +69,23 @@ public partial class MainWindow : Window
 
     private void DisplayExtensions(List<string> extensions)
     {
-        viewModel.Items.Clear();
+        viewModel?.Items?.Clear();
 
         foreach (var extension in extensions)
         {
-            viewModel.Items.Add(new ItemViewModel { Text = extension });
+            viewModel?.Items?.Add(new ItemViewModel { Text = extension });
         }
     }
 
     private void PassChosenFiletypeToSortOnClick(object sender, RoutedEventArgs e)
     {
         var selectedItems = viewModel.GetSelectedItems();
-        foreach (var item in selectedItems)
+        if (selectedItems is not null)
         {
-            dirGuard.Setup.AddExtensionToSort(item.ToString());
+            foreach (var item in selectedItems)
+            {
+                dirGuard?.Setup.AddExtensionToSort(item.ToString());
+            }
         }
     }
 }

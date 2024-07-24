@@ -5,7 +5,7 @@ namespace UI.ViewModels
     public class ItemViewModel : INotifyPropertyChanged
     {
         private bool _isChecked;
-        private string _text;
+        private string? _text;
 
         public bool IsChecked
         {
@@ -20,7 +20,7 @@ namespace UI.ViewModels
             }
         }
 
-        public string Text
+        public string? Text
         {
             get => _text;
             set
@@ -33,7 +33,7 @@ namespace UI.ViewModels
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

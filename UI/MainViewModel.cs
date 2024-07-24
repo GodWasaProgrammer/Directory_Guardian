@@ -7,9 +7,9 @@ namespace UI.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<ItemViewModel> _items;
+        private ObservableCollection<ItemViewModel>? _items;
 
-        public ObservableCollection<ItemViewModel> Items
+        public ObservableCollection<ItemViewModel>? Items
         {
             get => _items;
             set
@@ -19,22 +19,14 @@ namespace UI.ViewModels
             }
         }
 
-        public MainViewModel()
+        public MainViewModel() => Items = [];
+
+        public List<string>? GetSelectedItems()
         {
-            Items = new ObservableCollection<ItemViewModel>
-            {
-                new ItemViewModel { Text = "Item 1", IsChecked = false },
-                new ItemViewModel { Text = "Item 2", IsChecked = true },
-                new ItemViewModel { Text = "Item 3", IsChecked = false }
-            };
+            return Items?.Where(item => item.IsChecked).Select(item => item.Text!).ToList();
         }
 
-        public List<string> GetSelectedItems()
-        {
-            return Items.Where(item => item.IsChecked).Select(item => item.Text).ToList();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

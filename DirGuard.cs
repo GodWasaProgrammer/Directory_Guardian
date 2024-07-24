@@ -1,16 +1,12 @@
 ﻿namespace DirectoryGuardian;
 
-public class DirGuard
+public class DirGuard(Setup setup)
 {
-    private Setup set_up;
+    private readonly Setup set_up = setup;
     public Setup Setup { get { return set_up; } }
 
-    private List<string> Extensions;
+    private List<string> Extensions = [];
     public List<string> Extensions_List { get { return Extensions; } }
-    public DirGuard(Setup setup)
-    {
-        set_up = setup;
-    }
 
     public void Directory_Guardian(JobType jobType)
     {
@@ -28,11 +24,16 @@ public class DirGuard
         Extensions = FetchExtensions(dirinfo);
         if (jobType is JobType.Sort)
         {
-            SortExtensionType(dirPathToGuard[0], dirinfo, set_up.extensionsToSort);
+            SortExtensionType(dirPathToGuard[0], dirinfo, set_up.ExtensionsToSort);
         }
     }
 
-    public List<string> FetchExtensions(string[] directoryInfo)
+    public static void Main()
+    {
+        // for compiler
+    }
+
+    public static List<string> FetchExtensions(string[] directoryInfo)
     {
         // read our extensions
         var listOfExtensions = new List<string>();
@@ -50,21 +51,19 @@ public class DirGuard
     private void SortExtensionType(string singledirpath, string[] dirinfo, List<string> listOfFileTypesToSort)
     {
         CreateSortingDirectory(singledirpath, listOfFileTypesToSort);
+        foreach (var file in dirinfo.Where(file => listOfFileTypesToSort.Contains(Path.GetExtension(file)))
         // we will then sort the files of that type to the dir
-        foreach (var file in dirinfo)
+        )
         {
-            if (listOfFileTypesToSort.Contains(Path.GetExtension(file)))
-            {
-                var destinationPath = Path.Combine(singledirpath, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
-                File.Move(file, destinationPath);
-            }
+            var destinationPath = Path.Combine(singledirpath, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
+            File.Move(file, destinationPath);
         }
 
         foreach (var extension in listOfFileTypesToSort)
         {
             Extensions.Remove(extension);
         }
-        set_up.extensionsToSort.Clear();
+        set_up.ExtensionsToSort.Clear();
 
 
     }
@@ -81,7 +80,9 @@ public class DirGuard
 
     public static void GuardDir(string dir)
     {
-        var Watcher = new FileSystemWatcher(dir);
-        Watcher.EnableRaisingEvents = true;
+        var Watcher = new FileSystemWatcher(dir)
+        {
+            EnableRaisingEvents = true
+        };
     }
 }

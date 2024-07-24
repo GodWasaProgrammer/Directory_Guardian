@@ -2,10 +2,10 @@
 
 public class Setup
 {
-    readonly List<string> DirectoriesToWatch = new List<string>();
-    readonly List<string> DirToSort = new List<string>();
-    private List<string> _extensionsToSort = [];
-    public List<string> extensionsToSort { get { return _extensionsToSort; } }
+    readonly List<string> DirectoriesToWatch = [];
+    readonly List<string> DirToSort = [];
+    private readonly List<string> _extensionsToSort = [];
+    public List<string> ExtensionsToSort { get { return _extensionsToSort; } }
     public void AddDirectoryToWatch(string directory)
     {
         DirectoriesToWatch.Add(directory);
