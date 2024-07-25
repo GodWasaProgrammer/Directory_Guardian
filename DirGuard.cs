@@ -69,7 +69,10 @@ public class DirGuard(Setup setup)
         )
         {
             var destinationPath = Path.Combine(singledir, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
-            File.Move(file, destinationPath);
+            if (!IsFileLocked(file) && !File.Exists(destinationPath))
+            {
+                File.Move(file, destinationPath);
+            }
         }
     }
 
@@ -144,6 +147,9 @@ public class DirGuard(Setup setup)
         {
             Console.WriteLine($"File: {e.FullPath} is not in use, can be moved.");
             // sort the files
+
+            Thread.Sleep(3000);
+
             SortExtensionType();
         }
         else
@@ -164,6 +170,8 @@ public class DirGuard(Setup setup)
 
     private void HandleNewFile(string filePath)
     {
+        // wait a little bit
+        Thread.Sleep(3000);
         while (IsFileLocked(filePath))
         {
             // wait a little bit

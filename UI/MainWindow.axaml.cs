@@ -91,6 +91,7 @@ public partial class MainWindow : Window
 
     private void StartGuardianMonitor(object sender, RoutedEventArgs e)
     {
-        dirGuard.Directory_Guardian(JobType.Monitor);
+        dirGuard?.Directory_Guardian(JobType.Monitor);
+        viewModel.ToggleMonitorCommand.Execute(null);
     }
 }
