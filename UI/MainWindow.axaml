@@ -11,32 +11,35 @@
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>
-		<Border BorderThickness="10" BorderBrush="Black" CornerRadius="3"
-          BoxShadow="5 5 10 0 DarkGray"
-        Padding="2" Margin="2">
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto" />
-			<ColumnDefinition Width="*" />
-		</Grid.ColumnDefinitions>
-		<StackPanel Grid.Column="0">
-			<Button Click="OpenFolderButton_Clicked">Choose Directory</Button>
-			<Button Click="PassChosenFiletypeToSortOnClick">Select File types</Button>
-			<Button Click="SortExtensions">Sort Selected</Button>
-			<Button Click="StartGuardianMonitor">Monitor</Button>
-		</StackPanel>
-		<ListBox ItemsSource="{Binding Items}" Grid.Column="1">
-			<ListBox.ItemTemplate>
-				<DataTemplate>
-					<StackPanel Orientation="Horizontal">
-						<CheckBox IsChecked="{Binding IsChecked}" />
-						<TextBlock Text="{Binding Text}" Margin="5,0,0,0" />
-					</StackPanel>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
-	</Grid>
-		</Border>
+	<Border BorderThickness="10" BorderBrush="Black" CornerRadius="3"
+            BoxShadow="5 5 10 0 DarkGray"
+            Padding="2" Margin="2">
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<StackPanel Grid.Column="0">
+				<Button Click="OpenFolderButton_Clicked">Choose Directory</Button>
+				<Button Click="PassChosenFiletypeToSortOnClick">Select File types</Button>
+				<Button Click="SortExtensions">Sort Selected</Button>
+				<StackPanel Orientation="Horizontal">
+					<Button Command="{Binding ToggleMonitorCommand}">Monitor</Button>
+					<Ellipse Width="20" Height="20" Fill="{Binding DiodeColor}" Margin="5,0,0,0"/>
+				</StackPanel>
+			</StackPanel>
+			<ListBox ItemsSource="{Binding Items}" Grid.Column="1">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<CheckBox IsChecked="{Binding IsChecked}" />
+							<TextBlock Text="{Binding Text}" Margin="5,0,0,0" />
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</Grid>
+	</Border>
 </Window>
 
 
