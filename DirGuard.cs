@@ -5,7 +5,7 @@ public class DirGuard(Setup setup)
     private readonly Setup set_up = setup;
     public Setup Setup { get { return set_up; } }
 
-    private string pathToDir;
+    private string? pathToDir;
 
     private List<string> Extensions = [];
     public List<string> Extensions_List { get { return Extensions; } }
@@ -88,10 +88,7 @@ public class DirGuard(Setup setup)
 
     public void MonitorDirectory(string dir)
     {
-        if (_watcher != null)
-        {
-            _watcher.Dispose();
-        }
+        _watcher?.Dispose();
 
         _watcher = new FileSystemWatcher(dir)
         {
@@ -171,27 +168,22 @@ public class DirGuard(Setup setup)
     private void HandleNewFile(string filePath)
     {
         // wait a little bit
-        Thread.Sleep(3000);
-        while (IsFileLocked(filePath))
-        {
-            // wait a little bit
-            Thread.Sleep(1000);
+        Thread.Sleep(1000);
 
-            if (!IsFileLocked(filePath))
-            {
-                // moving logic here
-                Console.WriteLine($"File: {filePath} is not in use, can be moved.");
-                // sort the files
-                SortExtensionType();
-            }
-            else
-            {
-                Console.WriteLine($"File: {filePath} is in use, cannot move.");
-            }
+        if (!IsFileLocked(filePath))
+        {
+            // moving logic here
+            Console.WriteLine($"File: {filePath} is not in use, can be moved.");
+            // sort the files
+            SortExtensionType();
+        }
+        else
+        {
+            Console.WriteLine($"File: {filePath} is in use, cannot move.");
         }
     }
 
-    private bool IsFileLocked(string filePath)
+    private static bool IsFileLocked(string filePath)
     {
         FileStream stream = null;
 
