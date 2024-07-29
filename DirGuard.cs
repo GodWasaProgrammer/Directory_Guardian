@@ -82,7 +82,7 @@ public class DirGuard
         )
         {
             var destinationPath = Path.Combine(singledir, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
-            if (!IsFileLocked(file) && !File.Exists(destinationPath))
+            if (!IsFileLocked(file, _logger) && !File.Exists(destinationPath))
             {
                 File.Move(file, destinationPath);
             }
@@ -129,11 +129,11 @@ public class DirGuard
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
+        Logger.Information($"File: {e.FullPath} {e.ChangeType}");
 
         if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"File: {e.FullPath} is not a type to watch, ignoring.");
+            Logger.Information($"File: {e.FullPath} is not a type to watch, ignoring.");
             return;
         }
 
@@ -145,26 +145,23 @@ public class DirGuard
 
     private void OnRenamed(object sender, RenamedEventArgs e)
     {
-        Console.WriteLine($"File: {e.OldFullPath} renamed to {e.FullPath}");
+        _logger.Information($"File: {e.OldFullPath} renamed to {e.FullPath}");
 
         if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"File: {e.FullPath} is not a type to watch, ignoring.");
+            _logger.Information($"File: {e.FullPath} is not a type to watch, ignoring.");
             return;
         }
 
-        if (!IsFileLocked(e.FullPath))
+        if (!IsFileLocked(e.FullPath, _logger))
         {
-            Console.WriteLine($"File: {e.FullPath} is not in use, can be moved.");
-            // sort the files
-
+            _logger.Information($"File: {e.FullPath} is not in use, can be moved.");
             Thread.Sleep(3000);
-
             SortExtensionType();
         }
         else
         {
-            Console.WriteLine($"File: {e.FullPath} is in use, cannot move.");
+            _logger.Information($"File: {e.FullPath} is in use, cannot move.");
         }
     }
 
@@ -183,37 +180,40 @@ public class DirGuard
         // wait a little bit
         Thread.Sleep(1000);
 
-        if (!IsFileLocked(filePath))
+        if (!IsFileLocked(filePath, _logger))
         {
             // moving logic here
-            Console.WriteLine($"File: {filePath} is not in use, can be moved.");
+            _logger.Information($"File: {filePath} is not in use, can be moved.");
             // sort the files
             SortExtensionType();
         }
         else
         {
-            Console.WriteLine($"File: {filePath} is in use, cannot move.");
+            _logger.Information($"File: {filePath} is in use, cannot move.");
         }
     }
 
-    private static bool IsFileLocked(string filePath)
+    private static bool IsFileLocked(string filePath, ILogger logger)
     {
         FileStream? stream = null;
 
         try
         {
             stream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            logger.Information($"File: {filePath} is not in use, can be moved");
             // Om vi kommer hit, är filen inte låst.
             return false;
         }
         catch (IOException)
         {
             // Fångar specifikt undantag för I/O-problem (t.ex. filen är låst).
+            logger.Warning($"File: {filePath} is locked, cannot move.");
             return true;
         }
         catch (UnauthorizedAccessException)
         {
             // Hanterar fall där vi inte har behörighet att komma åt filen.
+            logger.Warning($"File: {filePath} Not authorized, cannot move.");
             return true;
         }
         finally
