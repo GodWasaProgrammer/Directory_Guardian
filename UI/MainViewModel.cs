@@ -37,7 +37,7 @@ namespace UI.ViewModels
 
         public MainViewModel()
         {
-            Items = new ObservableCollection<ItemViewModel>();
+            Items = [];
             DiodeColor = Brushes.Red;
             _isMonitorActive = false;
 

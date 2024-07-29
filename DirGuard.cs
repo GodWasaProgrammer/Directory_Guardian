@@ -1,8 +1,21 @@
-﻿namespace DirectoryGuardian;
+﻿using Serilog;
 
-public class DirGuard(Setup setup)
+namespace DirectoryGuardian;
+
+public class DirGuard
 {
-    private readonly Setup set_up = setup;
+    public DirGuard(Setup setup)
+    {
+        set_up = setup;
+        _logger = new LoggerConfiguration()
+           .WriteTo.File("logs/MainLog.txt")
+           .CreateLogger();
+    }
+
+    private readonly ILogger _logger;
+    public ILogger Logger { get { return _logger; } }
+
+    private readonly Setup set_up;
     public Setup Setup { get { return set_up; } }
 
     private string? pathToDir;
@@ -19,6 +32,7 @@ public class DirGuard(Setup setup)
         {
             dirPathToGuard = set_up.FetchDirectoriesToSort();
             pathToDir = dirPathToGuard[0]; // assuming we only have one directory to guard
+            _logger.Information($"Directory Guardian was set to work on: {pathToDir}");
             var dirinfo = Directory.GetFiles(pathToDir);
             Extensions = FetchExtensions(dirinfo);
         }
@@ -29,9 +43,8 @@ public class DirGuard(Setup setup)
             SortExtensionType();
         }
 
-        if (jobType is JobType.Monitor)
+        if (jobType is JobType.Monitor && pathToDir is not null)
         {
-            // monitor our directory for changes and apply our sorting logic
             MonitorDirectory(pathToDir);
         }
     }
@@ -185,7 +198,7 @@ public class DirGuard(Setup setup)
 
     private static bool IsFileLocked(string filePath)
     {
-        FileStream stream = null;
+        FileStream? stream = null;
 
         try
         {
