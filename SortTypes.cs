@@ -3,7 +3,9 @@
 public enum SortTypes
 {
     Videos,
-    Pictures,
+    Images,
     Documents,
-    Executables
+    Audio,
+    Executables,
+    Archives
 }
