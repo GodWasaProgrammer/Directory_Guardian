@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using DirectoryGuardian.ViewModels;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -34,14 +35,22 @@ namespace UI.ViewModels
         }
 
         public ICommand ToggleMonitorCommand { get; }
+        public SortTypeViewModel SortTypeViewModelInstance { get; }
 
         public MainViewModel()
         {
             Items = [];
             DiodeColor = Brushes.Red;
             _isMonitorActive = false;
+            SortTypeViewModelInstance = new SortTypeViewModel();
 
             ToggleMonitorCommand = new RelayCommand(ToggleMonitor);
+            ItemViewModel itemViewModel_For_Design1 = new ItemViewModel();
+            itemViewModel_For_Design1.Text = "example.ttf";
+            Items.Add(itemViewModel_For_Design1);
+            ItemViewModel itemViewModel_For_Design2 = new ItemViewModel();
+            itemViewModel_For_Design1.Text = "example.pdf";
+            Items.Add(itemViewModel_For_Design2);
         }
 
         public List<string>? GetSelectedItems()
