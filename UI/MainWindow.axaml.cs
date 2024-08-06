@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using DirectoryGuardian;
+using DirectoryGuardian.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using UI.ViewModels;
@@ -10,11 +11,13 @@ namespace UI;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel viewModel;
+    private readonly SortTypeViewModel sortTypeViewModel;
     private DirGuard? dirGuard;
     public MainWindow()
     {
         InitializeComponent();
         viewModel = new MainViewModel();
+        sortTypeViewModel = viewModel.SortTypeViewModelInstance;
         DataContext = viewModel;
         Width = 800; Height = 450;
     }
@@ -50,9 +53,15 @@ public partial class MainWindow : Window
         DisplayExtensions(dirGuard.Extensions_List);
     }
 
+    private void SortTypes(object sender, RoutedEventArgs e)
+    {
+        var chosenTypes = sortTypeViewModel.GetSelectedSortTypes();
+        dirGuard?.SortByType(chosenTypes);
+    }
+
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
-        dirGuard?.Directory_Guardian(JobType.Sort);
+        dirGuard?.Directory_Guardian(JobType.SortByExtension);
         var selectedItems = viewModel.GetSelectedItems();
 
         if (selectedItems is null || viewModel.Items is null) return;

@@ -4,6 +4,7 @@ public enum JobType
 {
     Initialize,
     GetExtensions,
-    Sort,
+    SortByExtension,
+    SortByType,
     Monitor
 }
