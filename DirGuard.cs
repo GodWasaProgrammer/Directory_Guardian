@@ -57,92 +57,22 @@ public class DirGuard
     public void SortByType(List<SortTypes> chosenTypes)
     {
         var files = Directory.GetFiles(pathToDir);
+
         foreach (var type in chosenTypes)
         {
-            // sort files based on our chosen types
-            if (type is SortTypes.Archives)
-            {
+            if (!TypeLists.ExtensionsMap.ContainsKey(type))
+                continue;
 
-                foreach (var extension in TypeLists.ArchiveExtensions)
-                {
-                    Directory.CreateDirectory(SortTypes.Archives.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Archives.ToString(), Path.GetFileName(file)));
-                        }
-                    }
-                }
-            }
-            if (type is SortTypes.Audio)
+            var extensions = TypeLists.ExtensionsMap[type];
+            var targetDirectory = type.ToString();
+
+            Directory.CreateDirectory(targetDirectory);
+
+            foreach (var file in files)
             {
-                foreach (var extension in TypeLists.AudioExtensions)
+                if (extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Directory.CreateDirectory(SortTypes.Audio.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Audio.ToString(), Path.GetFileName(file)));
-                        }
-                    }
-                }
-            }
-            if (type is SortTypes.Documents)
-            {
-                foreach (var extension in TypeLists.DocumentExtensions)
-                {
-                    Directory.CreateDirectory(SortTypes.Documents.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Documents.ToString(), Path.GetFileName(file)));
-                        }
-                    }
-                }
-            }
-            if (type is SortTypes.Images)
-            {
-                foreach (var extension in TypeLists.ImageExtensions)
-                {
-                    Directory.CreateDirectory(SortTypes.Images.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Images.ToString(), Path.GetFileName(file)));
-                        }
-                    }
-                }
-            }
-            if (type is SortTypes.Videos)
-            {
-                foreach (var extension in TypeLists.VideoExtensions)
-                {
-                    Directory.CreateDirectory(SortTypes.Videos.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Videos.ToString(), Path.GetFileName(file)));
-                        }
-                    }
-                }
-            }
-            if (type is SortTypes.Images)
-            {
-                foreach (var extension in TypeLists.ImageExtensions)
-                {
-                    Directory.CreateDirectory(SortTypes.Images.ToString());
-                    foreach (var file in files)
-                    {
-                        if (file.EndsWith(extension))
-                        {
-                            File.Move(file, Path.Combine(SortTypes.Images.ToString(), Path.GetFileName(file)));
-                        }
-                    }
+                    File.Move(file, Path.Combine(targetDirectory, Path.GetFileName(file)));
                 }
             }
         }
