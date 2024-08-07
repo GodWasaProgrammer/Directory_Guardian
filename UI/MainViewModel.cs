@@ -46,11 +46,15 @@ public class MainViewModel : INotifyPropertyChanged
 
         ToggleMonitorCommand = new RelayCommand(ToggleMonitor);
 #if DEBUG
-        ItemViewModel itemViewModel_For_Design1 = new ItemViewModel();
-        itemViewModel_For_Design1.Text = "ttf";
+        ItemViewModel itemViewModel_For_Design1 = new()
+        {
+            Text = "ttf"
+        };
         Items.Add(itemViewModel_For_Design1);
-        ItemViewModel itemViewModel_For_Design2 = new ItemViewModel();
-        itemViewModel_For_Design2.Text = "pdf";
+        ItemViewModel itemViewModel_For_Design2 = new()
+        {
+            Text = "pdf"
+        };
         Items.Add(itemViewModel_For_Design2);
 #endif
     }

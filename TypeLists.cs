@@ -1,6 +1,6 @@
 ﻿namespace DirectoryGuardian;
 
-public class TypeLists
+public static class TypeLists
 {
     private static readonly Dictionary<SortTypes, List<string>> _ExtensionsMap = new()
     {

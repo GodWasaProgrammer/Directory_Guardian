@@ -12,7 +12,7 @@ namespace DirectoryGuardian.ViewModels
 
         public SortTypeViewModel()
         {
-            SortTypes = new ObservableCollection<SortTypeModel>();
+            SortTypes = [];
             foreach (SortTypes type in Enum.GetValues(typeof(SortTypes)))
             {
                 SortTypes.Add(new SortTypeModel(type, false));
