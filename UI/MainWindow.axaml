@@ -21,6 +21,9 @@
 			</Grid.ColumnDefinitions>
 			<StackPanel Orientation="Vertical" Grid.Column="0">
 				<Button Click="OpenFolderButton_Clicked">Choose Directory</Button>
+			</StackPanel>
+			<StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Bottom">
+				<TextBlock Text="{Binding ChosenFolder}" Margin="0,0,0,5"/>
 				<StackPanel Orientation="Horizontal">
 					<Button Click="StartGuardianMonitor">Monitor</Button>
 					<Ellipse Width="20" Height="20" Fill="{Binding DiodeColor}" Margin="5,0,0,0"/>

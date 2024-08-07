@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     private readonly MainViewModel viewModel;
     private readonly SortTypeViewModel sortTypeViewModel;
     private DirGuard? dirGuard;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -46,11 +47,13 @@ public partial class MainWindow : Window
                 // You can now use selectedFolderPath as needed
 
                 setup.AddDirectoryToSort(selectedFolderPath.LocalPath);
+                viewModel.ChosenFolder = selectedFolderPath.LocalPath;
             }
         }
         dirGuard = new DirGuard(setup);
         dirGuard.Directory_Guardian(JobType.Initialize);
         DisplayExtensions(dirGuard.Extensions_List);
+
     }
 
     private void SortTypes(object sender, RoutedEventArgs e)

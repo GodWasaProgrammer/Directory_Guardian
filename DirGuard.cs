@@ -66,13 +66,15 @@ public class DirGuard
             var extensions = TypeLists.ExtensionsMap[type];
             var targetDirectory = type.ToString();
 
-            Directory.CreateDirectory(targetDirectory);
+            var fullPath = Path.Combine(pathToDir, targetDirectory);
+
+            Directory.CreateDirectory(fullPath);
 
             foreach (var file in files)
             {
                 if (extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
-                    File.Move(file, Path.Combine(targetDirectory, Path.GetFileName(file)));
+                    File.Move(file, Path.Combine(fullPath, Path.GetFileName(file)));
                 }
             }
         }

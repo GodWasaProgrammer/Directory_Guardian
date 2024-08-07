@@ -14,6 +14,28 @@ public class MainViewModel : INotifyPropertyChanged
     private IBrush? _diodeColor;
     private bool _isMonitorActive;
 
+    private string _chosenFolder;
+    public string ChosenFolder
+    {
+        get
+        {
+            if (_chosenFolder != null)
+            {
+                return _chosenFolder;
+            }
+            else
+            {
+                return "No Folder Selected";
+            }
+        }
+        set
+        {
+            _chosenFolder = value;
+            OnPropertyChanged(nameof(ChosenFolder));
+        }
+    }
+
+
     public ObservableCollection<ItemViewModel>? Items
     {
         get => _items;
