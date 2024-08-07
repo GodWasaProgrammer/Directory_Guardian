@@ -61,6 +61,7 @@ public partial class MainWindow : Window
 
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
+        PassChosenFiletypeToSortOnClick();
         dirGuard?.Directory_Guardian(JobType.SortByExtension);
         var selectedItems = viewModel.GetSelectedItems();
 
@@ -86,7 +87,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void PassChosenFiletypeToSortOnClick(object sender, RoutedEventArgs e)
+    private void PassChosenFiletypeToSortOnClick()
     {
         var selectedItems = viewModel.GetSelectedItems();
         if (selectedItems is not null)
