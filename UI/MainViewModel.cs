@@ -65,6 +65,7 @@ public class MainViewModel : INotifyPropertyChanged
         DiodeColor = Brushes.Red;
         _isMonitorActive = false;
         SortTypeViewModelInstance = new SortTypeViewModel();
+        _chosenFolder = "No Folder Selected";
 
         ToggleMonitorCommand = new RelayCommand(ToggleMonitor);
 #if DEBUG

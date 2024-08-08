@@ -59,12 +59,22 @@ public partial class MainWindow : Window
     private void SortTypes(object sender, RoutedEventArgs e)
     {
         var chosenTypes = sortTypeViewModel.GetSelectedSortTypes();
-        dirGuard?.SortByType(chosenTypes);
+
+        if (dirGuard is not null)
+        {
+            if (chosenTypes is null)
+            {
+                dirGuard.Logger.Error("No sort type selected");
+                return;
+            }
+            dirGuard.Setup.TypesToSort = chosenTypes;
+            dirGuard.Directory_Guardian(JobType.SortByType);
+        }
     }
 
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
-        PassChosenFiletypeToSortOnClick();
+        Pass_Chosen_Extensions_ToSort_On_Click();
         dirGuard?.Directory_Guardian(JobType.SortByExtension);
         var selectedItems = viewModel.GetSelectedItems();
 
@@ -90,7 +100,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void PassChosenFiletypeToSortOnClick()
+    private void Pass_Chosen_Extensions_ToSort_On_Click()
     {
         var selectedItems = viewModel.GetSelectedItems();
         if (selectedItems is not null)
@@ -102,9 +112,19 @@ public partial class MainWindow : Window
         }
     }
 
-    private void StartGuardianMonitor(object sender, RoutedEventArgs e)
+    private void Monitor_By_Ext(object sender, RoutedEventArgs e)
     {
-        dirGuard?.Directory_Guardian(JobType.Monitor);
+        Pass_Chosen_Extensions_ToSort_On_Click();
+        dirGuard?.Directory_Guardian(JobType.MonitorByExtension);
         viewModel.ToggleMonitorCommand.Execute(null);
+    }
+
+    private void Monitor_By_Type(object sender, RoutedEventArgs e)
+    {
+        if (dirGuard is not null)
+        {
+            dirGuard.Setup.TypesToSort = sortTypeViewModel.GetSelectedSortTypes();
+            dirGuard.Directory_Guardian(JobType.MonitorByType);
+        }
     }
 }

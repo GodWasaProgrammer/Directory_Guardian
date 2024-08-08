@@ -22,13 +22,6 @@
 			<StackPanel Orientation="Vertical" Grid.Column="0">
 				<Button Click="OpenFolderButton_Clicked">Choose Directory</Button>
 			</StackPanel>
-			<StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Bottom">
-				<TextBlock Text="{Binding ChosenFolder}" Margin="0,0,0,5"/>
-				<StackPanel Orientation="Horizontal">
-					<Button Click="StartGuardianMonitor">Monitor</Button>
-					<Ellipse Width="20" Height="20" Fill="{Binding DiodeColor}" Margin="5,0,0,0"/>
-				</StackPanel>
-			</StackPanel>
 			<TabControl Grid.Column="1">
 				<TabItem Header="By extension">
 					<Grid>
@@ -36,17 +29,24 @@
 							<RowDefinition Height="*"/>
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
-					<ListBox ItemsSource="{Binding Items}">
-						<ListBox.ItemTemplate>
-							<DataTemplate>
-								<StackPanel Orientation="Horizontal">
-									<CheckBox IsChecked="{Binding IsChecked}" />
-									<TextBlock Text="{Binding Text}" Margin="5,0,0,0" />
-								</StackPanel>
-							</DataTemplate>
-						</ListBox.ItemTemplate>
-					</ListBox>
-				<Button Grid.Row="1" HorizontalAlignment="Left" Click="SortExtensions">Sort</Button>
+						<ListBox ItemsSource="{Binding Items}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal">
+										<CheckBox IsChecked="{Binding IsChecked}" />
+										<TextBlock Text="{Binding Text}" Margin="5,0,0,0" />
+									</StackPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+						<StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Bottom">
+							<TextBlock Text="{Binding ChosenFolder}" Margin="0,0,0,5"/>
+							<StackPanel Orientation="Horizontal">
+								<Button Grid.Row="1" HorizontalAlignment="Left" Click="SortExtensions">Sort</Button>
+								<Button Click="Monitor_By_Ext">Monitor</Button>
+								<Ellipse Width="20" Height="20" Fill="{Binding DiodeColor}" Margin="5,0,0,0"/>
+							</StackPanel>
+						</StackPanel>
 					</Grid>
 				</TabItem>
 				<TabItem Header="By types">
@@ -65,7 +65,14 @@
 								</DataTemplate>
 							</ListBox.ItemTemplate>
 						</ListBox>
-						<Button Click="SortTypes" Grid.Row="1" HorizontalAlignment="Left">Sort</Button>
+						<StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Bottom">
+							<TextBlock Text="{Binding ChosenFolder}" Margin="0,0,0,5"/>
+							<StackPanel Orientation="Horizontal">
+								<Button Click="SortTypes" Grid.Row="1" HorizontalAlignment="Left">Sort</Button>
+								<Button Click="Monitor_By_Type">Monitor</Button>
+								<Ellipse Width="20" Height="20" Fill="{Binding DiodeColor}" Margin="5,0,0,0"/>
+							</StackPanel>
+						</StackPanel>
 					</Grid>
 				</TabItem>
 			</TabControl>

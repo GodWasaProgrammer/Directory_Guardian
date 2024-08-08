@@ -6,5 +6,6 @@ public enum JobType
     GetExtensions,
     SortByExtension,
     SortByType,
-    Monitor
+    MonitorByExtension,
+    MonitorByType
 }

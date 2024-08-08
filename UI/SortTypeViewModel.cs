@@ -8,7 +8,7 @@ namespace DirectoryGuardian.ViewModels
 {
     public class SortTypeViewModel : ReactiveObject
     {
-        private ObservableCollection<SortTypeModel> _sortTypes;
+        private ObservableCollection<SortTypeModel>? _sortTypes = new();
 
         public SortTypeViewModel()
         {
@@ -21,6 +21,11 @@ namespace DirectoryGuardian.ViewModels
 
         public List<SortTypes> GetSelectedSortTypes()
         {
+            if (_sortTypes is null)
+            {
+                // this should never happen
+                return new();
+            }
             var fetchedList = new ObservableCollection<SortTypeModel>(_sortTypes.Where(st => st.IsChecked));
 
             var ListToSort = new List<SortTypes>();
@@ -34,7 +39,14 @@ namespace DirectoryGuardian.ViewModels
 
         public ObservableCollection<SortTypeModel> SortTypes
         {
-            get => _sortTypes;
+            get
+            {
+                if (_sortTypes is null)
+                {
+                    return new();
+                }
+                return _sortTypes;
+            }
             set => this.RaiseAndSetIfChanged(ref _sortTypes, value);
         }
     }

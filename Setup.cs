@@ -6,10 +6,10 @@ public class Setup
     readonly List<string> DirToSort = [];
     private readonly List<string> _extensionsToSort = [];
     public List<string> ExtensionsToSort { get { return _extensionsToSort; } }
-    public void AddDirectoryToWatch(string directory)
-    {
-        DirectoriesToWatch.Add(directory);
-    }
+
+    private List<SortTypes>? _TypesToSort;
+    public List<SortTypes>? TypesToSort { get { return _TypesToSort; } set { _TypesToSort = value; } }
+
 
     public void AddDirectoryToSort(string directory)
     {

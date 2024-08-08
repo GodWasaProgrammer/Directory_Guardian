@@ -23,7 +23,7 @@ public class DirGuard
     private List<string> Extensions = [];
     public List<string> Extensions_List { get { return Extensions; } }
 
-    private FileSystemWatcher? _watcher;
+    private Monitor _Monitor;
 
     public void Directory_Guardian(JobType jobType)
     {
@@ -36,16 +36,32 @@ public class DirGuard
             var dirinfo = Directory.GetFiles(pathToDir);
             Extensions = FetchExtensions(dirinfo);
         }
-
-        // fetch our extensions, this will be displayed in UI to select which to sort
+        if (pathToDir is null)
+        {
+            _logger.Error("No directory to guard was found. Please ensure the path is correct and try again.");
+            return;
+        }
         if (jobType is JobType.SortByExtension)
         {
-            SortExtensionType();
+            _logger.Information($"Sorting extensions on {pathToDir}");
+            Sort_By_Extension();
         }
-
-        if (jobType is JobType.Monitor && pathToDir is not null)
+        if (jobType is JobType.SortByType)
         {
-            MonitorDirectory(pathToDir);
+            _logger.Information($"Sorting types on {pathToDir}");
+            Sort_By_Type();
+        }
+        if (jobType is JobType.MonitorByExtension)
+        {
+            _logger.Information($"Monitoring Extension on:{pathToDir}");
+            _Monitor = new Monitor(_logger, jobType, this);
+            _Monitor.MonitorDirectory(pathToDir, jobType);
+        }
+        if (jobType is JobType.MonitorByType)
+        {
+            _logger.Information($"Monitoring Type on:{pathToDir}");
+            _Monitor = new Monitor(_logger, jobType, this);
+            _Monitor.MonitorDirectory(pathToDir, jobType);
         }
     }
 
@@ -54,11 +70,21 @@ public class DirGuard
         // for compiler
     }
 
-    public void SortByType(List<SortTypes> chosenTypes)
+    public void Sort_By_Type()
     {
+        if (pathToDir is null)
+        {
+            _logger.Error("No directory to guard was found. Please ensure the path is correct and try again.");
+            return;
+        }
         var files = Directory.GetFiles(pathToDir);
 
-        foreach (var type in chosenTypes)
+        if (set_up.TypesToSort is null)
+        {
+            _logger.Error("No types to sort were provided. Please ensure the list is not empty and try again.");
+            return;
+        }
+        foreach (var type in set_up.TypesToSort)
         {
             if (!TypeLists.ExtensionsMap.ContainsKey(type))
                 continue;
@@ -95,12 +121,11 @@ public class DirGuard
         return listOfExtensions;
     }
 
-    private void SortExtensionType()
+    internal void Sort_By_Extension()
     {
         var listofDirs = Setup.FetchDirectoriesToSort();
         var singledir = listofDirs[0];
         var dirinfo = Directory.GetFiles(singledir);
-
 
         CreateSortingDirectory(singledir, set_up.ExtensionsToSort);
         foreach (var file in dirinfo.Where(file => set_up.ExtensionsToSort.Contains(Path.GetExtension(file)))
@@ -108,7 +133,7 @@ public class DirGuard
         )
         {
             var destinationPath = Path.Combine(singledir, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
-            if (!IsFileLocked(file, _logger) && !File.Exists(destinationPath))
+            if (!Monitor.IsFileLocked(file, _logger) && !File.Exists(destinationPath))
             {
                 File.Move(file, destinationPath);
             }
@@ -122,130 +147,6 @@ public class DirGuard
         {
             var dir = Path.Combine(singledirpath, file).Replace(".", "");
             Directory.CreateDirectory(dir);
-        }
-    }
-
-    public void MonitorDirectory(string dir)
-    {
-        _watcher?.Dispose();
-
-        _watcher = new FileSystemWatcher(dir)
-        {
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.Size,
-            Filter = "*",
-            EnableRaisingEvents = true
-        };
-
-        _watcher.Created += OnChanged;
-        _watcher.Changed += OnChanged;
-        _watcher.Deleted += OnChanged;
-        _watcher.Renamed += OnRenamed;
-
-
-        //unregister the watcher
-        _watcher.Disposed += (sender, e) =>
-        {
-            _watcher.Created -= OnChanged;
-            _watcher.Changed -= OnChanged;
-            _watcher.Deleted -= OnChanged;
-            _watcher.Renamed -= OnRenamed;
-        };
-        SortExtensionType();
-    }
-
-    private void OnChanged(object sender, FileSystemEventArgs e)
-    {
-        Logger.Information($"File: {e.FullPath} {e.ChangeType}");
-
-        if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
-        {
-            Logger.Information($"File: {e.FullPath} is not a type to watch, ignoring.");
-            return;
-        }
-
-        if (e.ChangeType == WatcherChangeTypes.Created)
-        {
-            HandleNewFile(e.FullPath);
-        }
-    }
-
-    private void OnRenamed(object sender, RenamedEventArgs e)
-    {
-        _logger.Information($"File: {e.OldFullPath} renamed to {e.FullPath}");
-
-        if (!set_up.ExtensionsToSort.Contains(Path.GetExtension(e.FullPath), StringComparer.OrdinalIgnoreCase))
-        {
-            _logger.Information($"File: {e.FullPath} is not a type to watch, ignoring.");
-            return;
-        }
-
-        if (!IsFileLocked(e.FullPath, _logger))
-        {
-            _logger.Information($"File: {e.FullPath} is not in use, can be moved.");
-            Thread.Sleep(3000);
-            SortExtensionType();
-        }
-        else
-        {
-            _logger.Information($"File: {e.FullPath} is in use, cannot move.");
-        }
-    }
-
-    public void StopMonitoring()
-    {
-        if (_watcher != null)
-        {
-            _watcher.EnableRaisingEvents = false;
-            _watcher.Dispose();
-            _watcher = null;
-        }
-    }
-
-    private void HandleNewFile(string filePath)
-    {
-        // wait a little bit
-        Thread.Sleep(1000);
-
-        if (!IsFileLocked(filePath, _logger))
-        {
-            // moving logic here
-            _logger.Information($"File: {filePath} is not in use, can be moved.");
-            // sort the files
-            SortExtensionType();
-        }
-        else
-        {
-            _logger.Information($"File: {filePath} is in use, cannot move.");
-        }
-    }
-
-    private static bool IsFileLocked(string filePath, ILogger logger)
-    {
-        FileStream? stream = null;
-
-        try
-        {
-            stream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            logger.Information($"File: {filePath} is not in use, can be moved");
-            // Om vi kommer hit, är filen inte låst.
-            return false;
-        }
-        catch (IOException)
-        {
-            // Fångar specifikt undantag för I/O-problem (t.ex. filen är låst).
-            logger.Warning($"File: {filePath} is locked, cannot move.");
-            return true;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Hanterar fall där vi inte har behörighet att komma åt filen.
-            logger.Warning($"File: {filePath} Not authorized, cannot move.");
-            return true;
-        }
-        finally
-        {
-            // Säkerställer att strömmen stängs om den öppnades.
-            stream?.Close();
         }
     }
 }
