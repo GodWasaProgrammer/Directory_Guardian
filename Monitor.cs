@@ -2,11 +2,12 @@
 
 namespace DirectoryGuardian;
 
-internal class Monitor
+public class Monitor
 {
     private FileSystemWatcher? _watcher;
     private readonly ILogger _Logger;
     private readonly DirGuard Guard;
+    public bool IsActive { get; private set; }
 
     // private field for logic in the delegates for the watcher
     private JobType _Monitor_Job;
@@ -54,6 +55,7 @@ internal class Monitor
         {
             Guard.Sort_By_Extension();
         }
+        IsActive = true;
     }
 
     private void OnChanged(object sender, FileSystemEventArgs e)
@@ -82,16 +84,15 @@ internal class Monitor
             {
                 // Fetch the extensions related to the type
                 if (TypeLists.ExtensionsMap.TryGetValue(type, out var extensions))
+                    continue;
+                // Check if the file extension matches any in the list
+                if (extensions.Any(extension => extension.Equals(Path.GetExtension(e.FullPath), StringComparison.OrdinalIgnoreCase)))
                 {
-                    // Check if the file extension matches any in the list
-                    if (extensions.Any(extension => extension.Equals(Path.GetExtension(e.FullPath), StringComparison.OrdinalIgnoreCase)))
+                    if (e.ChangeType == WatcherChangeTypes.Created)
                     {
-                        if (e.ChangeType == WatcherChangeTypes.Created)
-                        {
-                            HandleNewFile(e.FullPath);
-                        }
-                        matched = true; // Mark as matched
+                        HandleNewFile(e.FullPath);
                     }
+                    matched = true; // Mark as matched
                 }
             }
 
@@ -130,11 +131,14 @@ internal class Monitor
         {
             bool matched = false;
 
-            foreach (var type in Guard.Setup.TypesToSort)
+            if (Guard.Setup.TypesToSort is not null)
             {
-                // Fetch the extensions related to the type
-                if (TypeLists.ExtensionsMap.TryGetValue(type, out var extensions))
+                foreach (var type in Guard.Setup.TypesToSort)
                 {
+                    // Fetch the extensions related to the type
+                    if (!TypeLists.ExtensionsMap.TryGetValue(type, out var extensions))
+                        continue;
+
                     // Check if the file extension matches any in the list
                     if (extensions.Any(extension => extension.Equals(Path.GetExtension(e.FullPath), StringComparison.OrdinalIgnoreCase)))
                     {
@@ -165,6 +169,7 @@ internal class Monitor
             _watcher.Dispose();
             _watcher = null;
         }
+        IsActive = false;
     }
 
     private void HandleNewFile(string filePath)

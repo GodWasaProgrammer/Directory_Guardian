@@ -6,17 +6,18 @@ public class DirGuard
 {
     public DirGuard(Setup setup)
     {
-        set_up = setup;
+        _setup = setup;
         _logger = new LoggerConfiguration()
            .WriteTo.File("logs/MainLog.txt")
            .CreateLogger();
+        _Monitor = new Monitor(Logger, JobType.Initialize, this);
     }
 
     private readonly ILogger _logger;
     public ILogger Logger { get { return _logger; } }
 
-    private readonly Setup set_up;
-    public Setup Setup { get { return set_up; } }
+    private readonly Setup _setup;
+    public Setup Setup { get { return _setup; } }
 
     private string? pathToDir;
 
@@ -24,13 +25,14 @@ public class DirGuard
     public List<string> Extensions_List { get { return Extensions; } }
 
     private Monitor _Monitor;
+    public Monitor Monitor { get { return _Monitor; } }
 
     public void Directory_Guardian(JobType jobType)
     {
         List<string> dirPathToGuard;
         if (jobType is JobType.Initialize)
         {
-            dirPathToGuard = set_up.FetchDirectoriesToSort();
+            dirPathToGuard = _setup.FetchDirectoriesToSort();
             pathToDir = dirPathToGuard[0]; // assuming we only have one directory to guard
             _logger.Information($"Directory Guardian was set to work on: {pathToDir}");
             var dirinfo = Directory.GetFiles(pathToDir);
@@ -63,6 +65,11 @@ public class DirGuard
             _Monitor = new Monitor(_logger, jobType, this);
             _Monitor.MonitorDirectory(pathToDir, jobType);
         }
+        if (jobType is JobType.StopMonitor)
+        {
+            _logger.Information($"Stopping Monitoring on:{pathToDir}");
+            _Monitor?.StopMonitoring();
+        }
     }
 
     public static void Main()
@@ -79,12 +86,12 @@ public class DirGuard
         }
         var files = Directory.GetFiles(pathToDir);
 
-        if (set_up.TypesToSort is null)
+        if (_setup.TypesToSort is null)
         {
             _logger.Error("No types to sort were provided. Please ensure the list is not empty and try again.");
             return;
         }
-        foreach (var type in set_up.TypesToSort)
+        foreach (var type in _setup.TypesToSort)
         {
             if (!TypeLists.ExtensionsMap.ContainsKey(type))
                 continue;
@@ -127,8 +134,8 @@ public class DirGuard
         var singledir = listofDirs[0];
         var dirinfo = Directory.GetFiles(singledir);
 
-        CreateSortingDirectory(singledir, set_up.ExtensionsToSort);
-        foreach (var file in dirinfo.Where(file => set_up.ExtensionsToSort.Contains(Path.GetExtension(file)))
+        CreateSortingDirectory(singledir, _setup.ExtensionsToSort);
+        foreach (var file in dirinfo.Where(file => _setup.ExtensionsToSort.Contains(Path.GetExtension(file)))
         // we will then sort the files of that type to the dir
         )
         {

@@ -114,17 +114,51 @@ public partial class MainWindow : Window
 
     private void Monitor_By_Ext(object sender, RoutedEventArgs e)
     {
-        Pass_Chosen_Extensions_ToSort_On_Click();
-        dirGuard?.Directory_Guardian(JobType.MonitorByExtension);
-        viewModel.ToggleMonitorCommand.Execute(null);
+        if (dirGuard is not null)
+        {
+            if (!dirGuard.Monitor.IsActive)
+            {
+                Pass_Chosen_Extensions_ToSort_On_Click();
+                dirGuard.Directory_Guardian(JobType.MonitorByExtension);
+                if (dirGuard.Monitor.IsActive)
+                {
+                    viewModel.ToggleMonitorCommand.Execute(null);
+                }
+            }
+            else
+            {
+                StopMonitor();
+            }
+        }
     }
 
     private void Monitor_By_Type(object sender, RoutedEventArgs e)
     {
         if (dirGuard is not null)
         {
-            dirGuard.Setup.TypesToSort = sortTypeViewModel.GetSelectedSortTypes();
-            dirGuard.Directory_Guardian(JobType.MonitorByType);
+            if (!dirGuard.Monitor.IsActive)
+            {
+                dirGuard.Setup.TypesToSort = sortTypeViewModel.GetSelectedSortTypes();
+                dirGuard.Directory_Guardian(JobType.MonitorByType);
+                if (dirGuard.Monitor.IsActive)
+                {
+                    viewModel.ToggleMonitorCommand.Execute(null);
+                }
+            }
+            else
+            {
+                StopMonitor();
+            }
+        }
+    }
+
+    private void StopMonitor()
+    {
+        dirGuard?.Directory_Guardian(JobType.StopMonitor);
+
+        if (!dirGuard.Monitor.IsActive)
+        {
+            viewModel.ToggleMonitorCommand.Execute(null);
         }
     }
 }
