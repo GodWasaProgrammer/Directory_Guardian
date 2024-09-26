@@ -27,49 +27,39 @@ public class DirGuard
     private Monitor _Monitor;
     public Monitor Monitor { get { return _Monitor; } }
 
-    public void Directory_Guardian(JobType jobType)
+    public void StartGuardian()
     {
         List<string> dirPathToGuard;
-        if (jobType is JobType.Initialize)
-        {
-            dirPathToGuard = _setup.FetchDirectoriesToSort();
-            pathToDir = dirPathToGuard[0]; // assuming we only have one directory to guard
-            _logger.Information($"Directory Guardian was set to work on: {pathToDir}");
-            var dirinfo = Directory.GetFiles(pathToDir);
-            Extensions = FetchExtensions(dirinfo);
-        }
+        dirPathToGuard = _setup.FetchDirectoriesToSort();
+        pathToDir = dirPathToGuard[0]; // assuming we only have one directory to guard
+        _logger.Information($"Directory Guardian was set to work on: {pathToDir}");
+        var dirinfo = Directory.GetFiles(pathToDir);
+        Extensions = FetchExtensions(dirinfo);
+
         if (pathToDir is null)
         {
             _logger.Error("No directory to guard was found. Please ensure the path is correct and try again.");
-            return;
         }
-        if (jobType is JobType.SortByExtension)
-        {
-            _logger.Information($"Sorting extensions on {pathToDir}");
-            Sort_By_Extension();
-        }
-        if (jobType is JobType.SortByType)
-        {
-            _logger.Information($"Sorting types on {pathToDir}");
-            Sort_By_Type();
-        }
-        if (jobType is JobType.MonitorByExtension)
-        {
-            _logger.Information($"Monitoring Extension on:{pathToDir}");
-            _Monitor = new Monitor(_logger, jobType, this);
-            _Monitor.MonitorDirectory(pathToDir, jobType);
-        }
-        if (jobType is JobType.MonitorByType)
-        {
-            _logger.Information($"Monitoring Type on:{pathToDir}");
-            _Monitor = new Monitor(_logger, jobType, this);
-            _Monitor.MonitorDirectory(pathToDir, jobType);
-        }
-        if (jobType is JobType.StopMonitor)
-        {
-            _logger.Information($"Stopping Monitoring on:{pathToDir}");
-            _Monitor?.StopMonitoring();
-        }
+    }
+
+    public void StopMonitor()
+    {
+        _logger.Information($"Stopping Monitoring on:{pathToDir}");
+        _Monitor?.StopMonitoring();
+    }
+
+    public void MonitorByExtension(JobType jobType)
+    {
+        _logger.Information($"Monitoring Extension on:{pathToDir}");
+        _Monitor = new Monitor(_logger, jobType, this);
+        _Monitor.MonitorDirectory(pathToDir, jobType);
+    }
+
+    public void MonitorByType(JobType jobType)
+    {
+        _logger.Information($"Monitoring Type on:{pathToDir}");
+        _Monitor = new Monitor(_logger, jobType, this);
+        _Monitor.MonitorDirectory(pathToDir, jobType);
     }
 
     public static void Main()
@@ -79,6 +69,7 @@ public class DirGuard
 
     public void Sort_By_Type()
     {
+        _logger.Information($"Sorting types on {pathToDir}");
         if (pathToDir is null)
         {
             _logger.Error("No directory to guard was found. Please ensure the path is correct and try again.");
@@ -128,8 +119,9 @@ public class DirGuard
         return listOfExtensions;
     }
 
-    internal void Sort_By_Extension()
+    public void Sort_By_Extension()
     {
+        _logger.Information($"Sorting extensions on {pathToDir}");
         var listofDirs = Setup.FetchDirectoriesToSort();
         var singledir = listofDirs[0];
         var dirinfo = Directory.GetFiles(singledir);

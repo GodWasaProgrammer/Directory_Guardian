@@ -51,9 +51,8 @@ public partial class MainWindow : Window
             }
         }
         dirGuard = new DirGuard(setup);
-        dirGuard.Directory_Guardian(JobType.Initialize);
+        dirGuard.StartGuardian();
         DisplayExtensions(dirGuard.Extensions_List);
-
     }
 
     private void SortTypes(object sender, RoutedEventArgs e)
@@ -68,14 +67,14 @@ public partial class MainWindow : Window
                 return;
             }
             dirGuard.Setup.TypesToSort = chosenTypes;
-            dirGuard.Directory_Guardian(JobType.SortByType);
+            dirGuard.Sort_By_Type();
         }
     }
 
     private void SortExtensions(object sender, RoutedEventArgs e)
     {
         Pass_Chosen_Extensions_ToSort_On_Click();
-        dirGuard?.Directory_Guardian(JobType.SortByExtension);
+        dirGuard?.Sort_By_Extension();
         var selectedItems = viewModel.GetSelectedItems();
 
         if (selectedItems is null || viewModel.Items is null) return;
@@ -119,7 +118,7 @@ public partial class MainWindow : Window
             if (!dirGuard.Monitor.IsActive)
             {
                 Pass_Chosen_Extensions_ToSort_On_Click();
-                dirGuard.Directory_Guardian(JobType.MonitorByExtension);
+                dirGuard.MonitorByExtension(JobType.MonitorByExtension);
                 if (dirGuard.Monitor.IsActive)
                 {
                     viewModel.ToggleMonitorCommand.Execute(null);
@@ -139,7 +138,7 @@ public partial class MainWindow : Window
             if (!dirGuard.Monitor.IsActive)
             {
                 dirGuard.Setup.TypesToSort = sortTypeViewModel.GetSelectedSortTypes();
-                dirGuard.Directory_Guardian(JobType.MonitorByType);
+                dirGuard.MonitorByType(JobType.MonitorByType);
                 if (dirGuard.Monitor.IsActive)
                 {
                     viewModel.ToggleMonitorCommand.Execute(null);
@@ -154,11 +153,12 @@ public partial class MainWindow : Window
 
     private void StopMonitor()
     {
-        dirGuard?.Directory_Guardian(JobType.StopMonitor);
-
-        if (!dirGuard.Monitor.IsActive)
+        if (dirGuard is not null)
         {
-            viewModel.ToggleMonitorCommand.Execute(null);
+            if(!dirGuard.Monitor.IsActive)
+            {
+                viewModel.ToggleMonitorCommand.Execute(null);
+            }
         }
     }
 }
