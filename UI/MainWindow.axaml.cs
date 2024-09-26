@@ -155,6 +155,7 @@ public partial class MainWindow : Window
     {
         if (dirGuard is not null)
         {
+            dirGuard.StopMonitor();
             if(!dirGuard.Monitor.IsActive)
             {
                 viewModel.ToggleMonitorCommand.Execute(null);

@@ -11,9 +11,11 @@ public class DirGuard
            .WriteTo.File("logs/MainLog.txt")
            .CreateLogger();
         _Monitor = new Monitor(Logger, JobType.Initialize, this);
+        _resetChanges = new ResetManager(this, _logger);
     }
 
     private readonly ILogger _logger;
+    private readonly ResetManager _resetChanges;
     public ILogger Logger { get { return _logger; } }
 
     private readonly Setup _setup;
@@ -98,6 +100,11 @@ public class DirGuard
             {
                 if (extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
+                    Record record = new Record();
+                    record.OGpath = file;
+                    record.NewPath = Path.Combine(fullPath, Path.GetFileName(file));
+                    record.TimeOfChange = DateTime.Now;
+                    _resetChanges.RecordChange(record);
                     File.Move(file, Path.Combine(fullPath, Path.GetFileName(file)));
                 }
             }
@@ -134,6 +141,11 @@ public class DirGuard
             var destinationPath = Path.Combine(singledir, Path.GetExtension(file).Replace(".", ""), Path.GetFileName(file));
             if (!Monitor.IsFileLocked(file, _logger) && !File.Exists(destinationPath))
             {
+                Record record = new Record();
+                record.OGpath = file;
+                record.NewPath = destinationPath;
+                record.TimeOfChange = DateTime.Now;
+                _resetChanges.RecordChange(record);
                 File.Move(file, destinationPath);
             }
         }
